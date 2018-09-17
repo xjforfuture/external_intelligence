@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 
-from external_intelligence import proxy_pool as proxy
+from external_intelligence import proxy_source as proxy
 
 
 WEIBU_JUDGMENTS = {
@@ -45,14 +45,14 @@ def access_web(method, url, proxy, param=None):
     }
 
     try:
-        res = methods.get(method)(url, proxies=proxy)
+        res = methods.get(method)(url, proxies=proxy.copy())
     except:
         logging.error('Exception:Can not access weibu')
     else:
         if res.status_code == 200:
             return res.text
-        else:
-            return ' '
+
+    return ' '
 
 
 def get_weibu_intel(check_item, proxy):
@@ -84,7 +84,7 @@ def get_weibu_intel(check_item, proxy):
         infos = wb_tag(bs)
         rlt['wb_tag'] = [item['wb_tag'] for item in infos if item.get('wb_tag')]
         rlt['wb_info'] = [item['wb_info'] for item in infos if item.get('wb_info')]
-    elif bs.find('div', class_='sp-report__malicious'):
+    elif bs.find('div', class_='sp-report__malicious') or bs.find('div', class_='sp-report__community-malicious'):
         rlt['wb_rlt'] = 'yes'
         infos = wb_tag(bs)
         rlt['wb_tag'] = [item['wb_tag'] for item in infos if item.get('wb_tag')]
