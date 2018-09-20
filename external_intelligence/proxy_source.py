@@ -10,7 +10,7 @@ from external_intelligence import config as cfg
 PROXY_POOL_LOCK = threading.Lock()
 PROXY_POOL = []
 
-PROXY_POOL_MAX = 2
+PROXY_POOL_MAX = cfg.MIN_ACTIVE_PROXIES *2
 
 
 def get_proxies(num):
@@ -51,21 +51,19 @@ def update_proxys():
         '96.225.46.134:46874',
     ]
 
-    '''
-    res = requests.get(cfg.PROXY_SOURCE_URL)
+
+    res = requests.get(cfg.PROXY_SOURCE_URL, timeout=30)
     if res.status_code == 200:
-        res.json()
-    '''
-    new_proxis = functional.seq(test)\
-        .map(lambda o: {'http':'http://'+o, 'https':'https://'+o}) \
-        .filter(check_proxy)\
-        .list()
+        new_proxis = functional.seq(res.text.split('\r\n'))\
+            .map(lambda o: {'http':'http://'+o, 'https':'https://'+o}) \
+            .filter(check_proxy)\
+            .list()
 
-    PROXY_POOL_LOCK.acquire()
-    PROXY_POOL.extend(new_proxis)
-    PROXY_POOL_LOCK.release()
+        PROXY_POOL_LOCK.acquire()
+        PROXY_POOL.extend(new_proxis)
+        PROXY_POOL_LOCK.release()
 
-    logging.debug('sum of proxies %d'%len(PROXY_POOL))
+        logging.debug('sum of proxies %d'%len(PROXY_POOL))
 
 
 class GetProxyThread(threading.Thread):  # 继承父类threading.Thread

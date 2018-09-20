@@ -134,7 +134,6 @@ class CheckControlThread(threading.Thread):  # 继承父类threading.Thread
 
                 # 代理池中的代理数量少于MIN_ACTIVE_PROXIES，申请新的代理
                 if len(s['proxies']) < cfg.MIN_ACTIVE_PROXIES:
-                    print('get proxies')
                     source_proxy_get(s['name'])
 
             functional.seq(self.datas.values()).for_each(update_proxies)
@@ -249,5 +248,6 @@ def init_intel_service():
 # for debug
 ###
 def display_currt_info():
-    logging.debug(SOURCE_DICT)
-    logging.debug(ps.PROXY_POOL)
+    for k,v in SOURCE_DICT.items():
+        logging.debug('source:%s, proxies %d, unactive proxies %d'%(k, len(v['proxies']), len(v['unactive_proxies'])))
+    logging.debug('proxies pool count %d'%len(ps.PROXY_POOL))

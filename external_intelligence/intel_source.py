@@ -45,7 +45,7 @@ def access_web(method, url, proxy, param=None):
     }
 
     try:
-        res = methods.get(method)(url, proxies=proxy.copy())
+        res = methods.get(method)(url, proxies=proxy.copy(), timeout=30)
     except:
         logging.error('Exception:Can not access weibu')
     else:

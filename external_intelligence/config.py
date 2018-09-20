@@ -17,7 +17,7 @@ EXTERNAL_ACCESS_CTL = [
 ]
 
 # 每个情报源中最少的代理数量
-MIN_ACTIVE_PROXIES = 2
+MIN_ACTIVE_PROXIES = 50
 
 # 保留的一个周期内查询次数被耗尽的代理数量
 REMAIN_MAX_UNACTIVE_PROXIES = 1000
