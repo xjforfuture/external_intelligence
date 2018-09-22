@@ -140,22 +140,23 @@ class CheckControlThread(threading.Thread):  # 继承父类threading.Thread
 
 
 def pull_source_proxy():
-    source = SOURCE_DICT[cfg.DEFAULT_SOURCE]
+    sourcies = functional.seq(cfg.EXTERNAL_ACCESS_CTL).map(lambda o: o['name']).map(lambda o: SOURCE_DICT[o]).list()
     source_proxy = None
-    CHK_CTL_LOCK.acquire()
-    while source['proxies']:
-        proxy = source['proxies'].pop(0)
-        if proxy['remain_count'] > 0:
-            source_proxy =  {
-                'name': source['name'],
-                'func':source['func'],
-                'proxy':proxy,
-            }
+
+    for source in sourcies:
+        CHK_CTL_LOCK.acquire()
+        while source['proxies']:
+            proxy = source['proxies'].pop(0)
+            if proxy['remain_count'] > 0:
+                source_proxy =  {
+                    'name': source['name'],
+                    'func':source['func'],
+                    'proxy':proxy,
+                }
+                break
+        CHK_CTL_LOCK.release()
+        if source_proxy:
             break
-
-    # todo 如果还有其他情报源， 继续取可用的情报源
-
-    CHK_CTL_LOCK.release()
 
     return source_proxy
 
@@ -228,12 +229,11 @@ class CheckThread(threading.Thread):  # 继承父类threading.Thread
 
 
 def init_intel_service():
-    sources = functional.seq(cfg.EXTERNAL_ACCESS_CTL) \
-        .zip(intel_source) \
-        .map(lambda o: {**o[0], **o[1]}) \
+    sourcies = functional.seq(cfg.EXTERNAL_ACCESS_CTL)\
+        .map(lambda o: {**intel_source.get(o['name']), **o})\
         .list()
 
-    for s in sources:
+    for s in sourcies:
         SOURCE_DICT[s['name']] = s
         source_proxy_get(s['name'], init=True)
 
